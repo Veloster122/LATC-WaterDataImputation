@@ -1,0 +1,34 @@
+# Bytes and Mac specific
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.DS_Store
+
+# Virtual Environment
+venv/
+env/
+.env
+
+# Streamlit
+.streamlit/secrets.toml
+.streamlit/credentials.toml
+# Keep config.toml if it has theme/server settings
+
+# Data files (Exclude large CSVs but maybe keep examples)
+data/*.csv
+*.csv
+!data/example_*.csv
+!data/dataset_amostra_*.csv # Keep the sample we just created if user wants
+!data/dataset_exemplo_70mb.csv # Explicitly allow the 70MB example
+
+# Project specific large outputs
+RESULTADO_FINAL.csv
+RESULTADO_FINAL_SUAVIZADO.csv
+dist/
+build/
+*.spec
+
+# IDEs
+.vscode/
+.idea/

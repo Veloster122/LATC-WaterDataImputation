@@ -94,9 +94,23 @@ with st.sidebar:
             f.write(uploaded_file.getbuffer())
         st.session_state['current_file'] = str(save_path.absolute())
     else:
-        # Default fallback
-        st.info("Usando arquivo padrão (Demo)")
-        st.session_state['current_file'] = str(Path("data/telemetria_consumos_202507281246.csv").absolute())
+        # Default fallback priority
+        default_options = [
+            Path("data/dataset_exemplo_70mb.csv"),
+            Path("data/web_upload.csv"),
+            Path("data/telemetria_consumos_202507281246.csv")
+        ]
+        
+        found_default = False
+        for p in default_options:
+            if p.exists():
+                st.info(f"📂 Usando arquivo padrão (Demo): `{p.name}` ({p.stat().st_size / (1024*1024):.1f} MB)")
+                st.session_state['current_file'] = str(p.absolute())
+                found_default = True
+                break
+                
+        if not found_default:
+            st.warning("⚠️ Nenhum arquivo de dados encontrado na pasta 'data/'.")
 
     st.markdown("---")
     
@@ -352,11 +366,19 @@ elif page == "Processamento":
                         value_columns = [col for col in df_to_smooth.columns if col.startswith('index_')]
                         
                         # CRITICAL: Load original dataset to identify gaps
-                        original_file = Path("data/web_upload.csv")
-                        if not original_file.exists():
-                            original_file = Path("data/telemetria_consumos_202507281246.csv")
+                        original_file = None
+                        default_original_files = [
+                            Path("data/dataset_exemplo_70mb.csv"), # New default 70MB example
+                            Path("data/web_upload.csv"),
+                            Path("data/telemetria_consumos_202507281246.csv")
+                        ]
                         
-                        if not original_file.exists():
+                        for p in default_original_files:
+                            if p.exists():
+                                original_file = p
+                                break
+                        
+                        if original_file is None:
                             st.error("❌ Arquivo original não encontrado. Necessário para identificar gaps.")
                             st.stop()
                         
