@@ -629,16 +629,22 @@ elif page == "Visualização":
             
             # Try to load original file
             original_file = None
-            default_original_files = [
-                Path("data/dataset_exemplo_70mb.csv"), # New default 70MB example
-                Path("data/web_upload.csv"),
-                Path("data/telemetria_consumos_202507281246.csv")
-            ]
             
-            for p in default_original_files:
-                if p.exists():
-                    original_file = p
-                    break
+            # Check session state first (Matches Tab 4 Logic)
+            if st.session_state.get('current_file') and os.path.exists(st.session_state['current_file']):
+                original_file = Path(st.session_state['current_file'])
+            else:
+                # Fallback priority: Upload > Demo > Legacy
+                default_original_files = [
+                    Path("data/web_upload.csv"), 
+                    Path("data/dataset_exemplo_70mb.csv"),
+                    Path("data/telemetria_consumos_202507281246.csv")
+                ]
+                
+                for p in default_original_files:
+                    if p.exists():
+                        original_file = p
+                        break
             
             if original_file and original_file.exists():
                 with st.spinner("Carregando dados originais..."):
@@ -811,12 +817,30 @@ elif page == "Visualização":
                     consumption_orig = None
                     ts_orig = None
                     
-                    # Try to load original file (reuse logic from tab3 if loaded globally, but let's be safe)
-                    original_file_path = Path("data/web_upload.csv")
-                    if not original_file_path.exists():
-                        original_file_path = Path("data/telemetria_consumos_202507281246.csv")
+                    # 2. Get Original Series (if available)
+                    consumption_orig = None
+                    ts_orig = None
                     
-                    if original_file_path.exists():
+                    # Try to load original file (reuse logic from tab3 if loaded globally, but let's be safe)
+                    original_file_path = None
+                    
+                    # Check session state first
+                    if st.session_state.get('current_file') and os.path.exists(st.session_state['current_file']):
+                        original_file_path = Path(st.session_state['current_file'])
+                    else:
+                        # Fallback priority: Upload > Demo > Legacy
+                        default_original_files = [
+                            Path("data/web_upload.csv"),
+                            Path("data/dataset_exemplo_70mb.csv"),
+                            Path("data/telemetria_consumos_202507281246.csv")
+                        ]
+                        
+                        for p in default_original_files:
+                            if p.exists():
+                                original_file_path = p
+                                break
+                    
+                    if original_file_path and original_file_path.exists():
                          # We need to read it efficiently. 
                          # Assuming it's already read in tab3 context? 
                          # Actually, st.session_state is best, but let's re-read or use df_original if available in scope
