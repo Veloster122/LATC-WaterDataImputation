@@ -21,6 +21,7 @@ data/*.csv
 !data/example_*.csv
 !data/dataset_amostra_*.csv # Keep the sample we just created if user wants
 !data/dataset_exemplo_70mb.csv # Explicitly allow the 70MB example
+!data/dataset_exemplo_70mb_imputado.csv # Allow the imputed version too
 
 # Project specific large outputs
 RESULTADO_FINAL.csv

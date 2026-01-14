@@ -628,11 +628,19 @@ elif page == "Visualização":
             st.markdown("### 🔀 Comparação: Original (com gaps) vs Imputado")
             
             # Try to load original file
-            original_file = Path("data/web_upload.csv")
-            if not original_file.exists():
-                original_file = Path("data/telemetria_consumos_202507281246.csv")
+            original_file = None
+            default_original_files = [
+                Path("data/dataset_exemplo_70mb.csv"), # New default 70MB example
+                Path("data/web_upload.csv"),
+                Path("data/telemetria_consumos_202507281246.csv")
+            ]
             
-            if original_file.exists():
+            for p in default_original_files:
+                if p.exists():
+                    original_file = p
+                    break
+            
+            if original_file and original_file.exists():
                 with st.spinner("Carregando dados originais..."):
                     df_original = pd.read_csv(original_file)
                 
