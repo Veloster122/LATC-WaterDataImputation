@@ -33,3 +33,6 @@ build/
 # IDEs
 .vscode/
 .idea/
+
+# PNGs
+*.png

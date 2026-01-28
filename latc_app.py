@@ -1,3 +1,10 @@
+# CRITICAL: Configure MKL threading BEFORE any imports to prevent conflicts
+import os
+os.environ["MKL_NUM_THREADS"] = "1"
+os.environ["NUMEXPR_NUM_THREADS"] = "1"
+os.environ["OMP_NUM_THREADS"] = "1"
+os.environ["OPENBLAS_NUM_THREADS"] = "1"
+
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -294,12 +301,26 @@ elif page == "Processamento":
                         verbose=False 
                     )
                 
-                # FORCE SAVE LOCAL COPY FOR USER
+                # FORCE SAVE LOCAL COPY FOR USER (ROBUST VERSION)
                 local_backup = Path("data/RESULTADO_FINAL.csv")
-                imputed.to_csv(local_backup, index=False)
-                status_text.text(f"✅ Salvo na pasta data: {local_backup.name}")
-                
-                st.success(f"Arquivo salvo também em: {local_backup.absolute()}")
+                try:
+                    # Ensure data directory exists
+                    local_backup.parent.mkdir(exist_ok=True)
+                    
+                    # Save with explicit encoding
+                    imputed.to_csv(local_backup, index=False, encoding='utf-8')
+                    
+                    # Verify it was actually written
+                    if local_backup.exists():
+                        file_size = local_backup.stat().st_size / (1024*1024)
+                        status_text.text(f"✅ Salvo: {local_backup.name} ({file_size:.1f} MB)")
+                        st.success(f"✅ Arquivo salvo em: `{local_backup.absolute()}`")
+                    else:
+                        st.warning(f"⚠️ Arquivo não foi criado em: {local_backup.absolute()}")
+                        
+                except Exception as save_error:
+                    st.error(f"❌ Erro ao salvar CSV: {save_error}")
+                    st.info("Mas você ainda pode baixar via botão abaixo!")
                 
                 # Save temp for download
                 from io import BytesIO
